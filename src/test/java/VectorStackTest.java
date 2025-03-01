@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.DisplayName;
 
 import static org.junit.jupiter.api.Assertions.*;
+import java.util.Vector;
 
 public class VectorStackTest {
     private VectorStack<String> stack;
@@ -46,3 +47,6 @@ public class VectorStackTest {
         assertThrows(IllegalStateException.class, () -> stack.peek());
     }
 }
+package org.example;
+
+

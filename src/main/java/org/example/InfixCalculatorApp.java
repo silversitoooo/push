@@ -3,6 +3,8 @@ package org.example;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Scanner;
 
 /**
@@ -11,7 +13,12 @@ import java.util.Scanner;
 public class InfixCalculatorApp {
     public static void main(String[] args) {
         InfixCalculatorApp app = new InfixCalculatorApp();
-        String[] infixExprs = app.readExpressionsFromFile("expressions.txt");
+        List<String> infixExpressions = app.readExpressionsFromFile("expression.txt");
+
+        if (infixExpressions.isEmpty()) {
+            System.out.println("No se encontraron expresiones en el archivo.");
+            return;
+        }
 
         // Obtenemos las opciones de pila y lista del usuario
         StackChoice stackChoice = app.getUserStackChoice();
@@ -29,38 +36,43 @@ public class InfixCalculatorApp {
 
         Calculator calculator = Calculator.getInstance();
         calculator.setStack(stack);
-
-        // Evaluar cada expresión infija
-        for (String infixExpr : infixExprs) {
-            try {
-                String postfixExpr = calculator.convertToPostfix(infixExpr);
-                System.out.println("Expresión infija: " + infixExpr);
-                System.out.println("Expresión posfija: " + postfixExpr);
-                double result = calculator.evaluatePostfix(postfixExpr);
-                System.out.println("Resultado: " + result);
-            } catch (Exception e) {
-                System.err.println("Error al evaluar la expresión '" + infixExpr + "': " + e.getMessage());
-            }
+        
+        System.out.println("\nProcesando expresiones:");
+        System.out.println("------------------------");
+        
+        for (int i = 0; i < infixExpressions.size(); i++) {
+            String infixExpr = infixExpressions.get(i);
+            System.out.println("\nExpresión " + (i + 1) + ": " + infixExpr);
+            
+            String postfixExpr = calculator.convertToPostfix(infixExpr);
+            System.out.println("Expresión posfija: " + postfixExpr);
+            
+            double result = calculator.evaluatePostfix(postfixExpr);
+            System.out.println("Resultado: " + result);
         }
     }
 
     /**
-     * Lee expresiones desde un archivo
+     * Lee múltiples expresiones desde un archivo
      * @param filename El nombre del archivo
-     * @return Las expresiones leídas
+     * @return Lista de expresiones leídas
      */
-    private String[] readExpressionsFromFile(String filename) {
-        StringBuilder content = new StringBuilder();
+    private List<String> readExpressionsFromFile(String filename) {
+        List<String> expressions = new ArrayList<>();
         try (BufferedReader reader = new BufferedReader(new FileReader(filename))) {
             String line;
             while ((line = reader.readLine()) != null) {
-                content.append(line).append("\n");
+                line = line.trim();
+                if (!line.isEmpty()) {
+                    expressions.add(line);
+                }
             }
         } catch (IOException e) {
             System.err.println("Error al leer el archivo: " + e.getMessage());
-            return new String[]{ "3+4*2/(1-5)", "(5+3)*2^3/(10-2*(1+1))" }; // Expresiones predeterminadas en caso de error
+            // Expresión predeterminada en caso de error
+            expressions.add("3+4*2/(1-5)");
         }
-        return content.toString().split("\n");
+        return expressions;
     }
 
     /**

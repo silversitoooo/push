@@ -41,7 +41,7 @@ public class Calculator {
                 number.append(c);
             } else {
                 if (number.length() > 0) {
-                    postfix.append(number);
+                    postfix.append(number).append(' ');
                     number.setLength(0);
                 }
 
@@ -49,13 +49,13 @@ public class Calculator {
                     stack.push(String.valueOf(c));
                 } else if (c == ')') {
                     while (!stack.isEmpty() && !stack.peek().equals("(")) {
-                        postfix.append(stack.pop());
+                        postfix.append(stack.pop()).append(' ');
                     }
                     if (!stack.isEmpty()) stack.pop();
                 } else if (isOperator(c)) {
                     while (!stack.isEmpty() && !stack.peek().equals("(") &&
                             getPrecedence(stack.peek().charAt(0)) >= getPrecedence(c)) {
-                        postfix.append(stack.pop());
+                        postfix.append(stack.pop()).append(' ');
                     }
                     stack.push(String.valueOf(c));
                 } else if (c != ' ') {
@@ -65,14 +65,14 @@ public class Calculator {
         }
 
         if (number.length() > 0) {
-            postfix.append(number);
+            postfix.append(number).append(' ');
         }
 
         while (!stack.isEmpty()) {
-            postfix.append(stack.pop());
+            postfix.append(stack.pop()).append(' ');
         }
 
-        return postfix.toString();
+        return postfix.toString().trim();
     }
 
     public double evaluatePostfix(String postfixExpr) {
@@ -84,15 +84,13 @@ public class Calculator {
         }
 
         IStack<Double> evalStack = new ArrayListStack<>();
-        StringTokenizer tokenizer = new StringTokenizer(postfixExpr);
-        while (tokenizer.hasMoreTokens()) {
-            String token = tokenizer.nextToken();
-
+        String[] tokens = postfixExpr.split("\\s+");
+        for (String token : tokens) {
             if (token.matches("\\d+")) {
                 evalStack.push(Double.parseDouble(token));
             } else if (isOperator(token.charAt(0))) {
                 if (evalStack.size() < 2) {
-                    throw new IllegalStateException("Expresión posfija mal formada: operador '" + token + "' sin suficientes operandos");
+                    throw new IllegalStateException("Expresión posfija mal formada");
                 }
 
                 double operand2 = evalStack.pop();
@@ -100,13 +98,11 @@ public class Calculator {
 
                 double result = performOperation(token.charAt(0), operand1, operand2);
                 evalStack.push(result);
-            } else {
-                throw new IllegalArgumentException("Token inválido en la expresión posfija: " + token);
             }
         }
 
         if (evalStack.size() != 1) {
-            throw new IllegalStateException("Expresión posfija inválida: no se obtuvo un único resultado.");
+            throw new IllegalStateException("Expresión posfija inválida");
         }
 
         return evalStack.pop();
